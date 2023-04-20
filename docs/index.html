@@ -9,9 +9,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Instructor: Diego Alburez-Gutierrez" />
 
 
-<title>Matrix Approaches to Modelling Kinship Theory and Applications</title>
+<title>The Demography of Kinship</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -231,125 +232,9 @@ ul.task-list{list-style: none;}
 
 
 
-<style type="text/css">
-code {
-white-space: pre;
-}
-.sourceCode {
-overflow: visible;
-}
-</style>
-<style type="text/css" data-origin="pandoc">
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-{ counter-reset: source-line 0; }
-pre.numberSource code > span
-{ position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-{ content: counter(source-line);
-position: relative; left: -1em; text-align: right; vertical-align: baseline;
-border: none; display: inline-block;
--webkit-touch-callout: none; -webkit-user-select: none;
--khtml-user-select: none; -moz-user-select: none;
--ms-user-select: none; user-select: none;
-padding: 0 4px; width: 4em;
-color: #aaaaaa;
-}
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
-div.sourceCode
-{ }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } 
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.at { color: #7d9029; } 
-code span.bn { color: #40a070; } 
-code span.bu { color: #008000; } 
-code span.cf { color: #007020; font-weight: bold; } 
-code span.ch { color: #4070a0; } 
-code span.cn { color: #880000; } 
-code span.co { color: #60a0b0; font-style: italic; } 
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.do { color: #ba2121; font-style: italic; } 
-code span.dt { color: #902000; } 
-code span.dv { color: #40a070; } 
-code span.er { color: #ff0000; font-weight: bold; } 
-code span.ex { } 
-code span.fl { color: #40a070; } 
-code span.fu { color: #06287e; } 
-code span.im { color: #008000; font-weight: bold; } 
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
-code span.kw { color: #007020; font-weight: bold; } 
-code span.op { color: #666666; } 
-code span.ot { color: #007020; } 
-code span.pp { color: #bc7a00; } 
-code span.sc { color: #4070a0; } 
-code span.ss { color: #bb6688; } 
-code span.st { color: #4070a0; } 
-code span.va { color: #19177c; } 
-code span.vs { color: #4070a0; } 
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
-</style>
-<script>
-// apply pandoc div.sourceCode style to pre.sourceCode instead
-(function() {
-  var sheets = document.styleSheets;
-  for (var i = 0; i < sheets.length; i++) {
-    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
-    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
-      var rule = rules[j];
-      // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
-      var style = rule.style.cssText;
-      // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
-      // replace div.sourceCode by a pre.sourceCode rule
-      sheets[i].deleteRule(j);
-      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
-    }
-  }
-})();
-</script>
 
 
 
-<style type="text/css">
-
-div.csl-bib-body { }
-div.csl-entry {
-clear: both;
-}
-.hanging div.csl-entry {
-margin-left:2em;
-text-indent:-2em;
-}
-div.csl-left-margin {
-min-width:2em;
-float:left;
-}
-div.csl-right-inline {
-margin-left:2em;
-padding-left:1em;
-}
-div.csl-indent {
-margin-left: 2em;
-}
-</style>
 
 
 
@@ -396,23 +281,17 @@ overflow-y: auto;
 border: 1px solid #ddd;
 border-radius: 4px;
 }
-.tabset-dropdown > .nav-tabs > li.active:before {
-content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+content: "\e259";
 font-family: 'Glyphicons Halflings';
 display: inline-block;
 padding: 10px;
 border-right: 1px solid #ddd;
 }
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-content: "";
-border: none;
-}
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-content: "";
+content: "\e258";
 font-family: 'Glyphicons Halflings';
-display: inline-block;
-padding: 10px;
-border-right: 1px solid #ddd;
+border: none;
 }
 .tabset-dropdown > .nav-tabs > li.active {
 display: block;
@@ -453,10 +332,11 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">Matrix Approaches to Modelling Kinship
-Theory and Applications</h1>
-<h3 class="subtitle">IDEM 128 - Computer lab exercises</h3>
-<h4 class="date">Update: 2023-04-18</h4>
+<h1 class="title toc-ignore">The Demography of Kinship</h1>
+<h3 class="subtitle">European Doctoral School of Demography, Barcelona,
+April 24-29, 2023</h3>
+<h4 class="author">Instructor: Diego Alburez-Gutierrez</h4>
+<h4 class="date">Updated: 2023-04-20</h4>
 
 </div>
 
@@ -465,209 +345,35 @@ Theory and Applications</h1>
 <h2 class="tabset"></h2>
 <div id="introduction" class="section level3">
 <h3>Introduction</h3>
-<p>This guide pretends to give you some practical tools for applying the
-theory on your own specific research goals. In each day we will have a
-time for learn how to code in R some key matrix forms and get basic
-results. In a second part we will use DemoKin package for speeding up
-the pathway between ideas/questions and results. With the first part you
-will have a notion of what is happening when you run functions in the
-second part, so you can customize your code for your own purpose if is
-necessary.</p>
-<p>For the next 10 days we are kind of course-related-non
-biological-family, so brother/sister: please reach us for any doubt.</p>
-<p>We hope you enjoy it and be helpful. Hands on.</p>
-<p>Hal, Diego and Iván.</p>
-<!-- --------------------------------------------------------------------- -->
-</div>
-<div id="wed-3" class="section level3">
-<h3>Wed 3</h3>
-<div id="initial-settings" class="section level4">
-<h4>Initial settings</h4>
-<p>We will start tomorrow the computer lab, but would be great if in
-advance we have prepared R environment. Firs, you will need R and
-Rstudio installed.</p>
-<p>Install the <a href="https://github.com/IvanWilli/DemoKin">development version from
-GitHub</a> (could take ~1 minute). We made changes to the
-<code>DemoKin</code> package ahead of this workshop If you had already
-installed the package, please uninstall it and and install it again.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove.packages(&quot;DemoKin&quot;)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(&quot;devtools&quot;)</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;IvanWilli/DemoKin&quot;</span>, <span class="at">build_vignettes =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
-<p>Other packages that will be useful are:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>packages_needed <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;tidyverse&quot;</span>, <span class="st">&quot;HMDHFDplus&quot;</span>, <span class="st">&quot;matrixcalc&quot;</span>, <span class="st">&quot;Matrix&quot;</span>) </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>packages_needed_nothaving <span class="ot">&lt;-</span> packages_needed[<span class="sc">!</span>packages_needed <span class="sc">%in%</span> <span class="fu">installed.packages</span>()</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(lib <span class="cf">in</span> packages_needed_nothaving) <span class="fu">install.packages</span>(lib,<span class="at">dependencies=</span><span class="cn">TRUE</span>)</span></code></pre></div>
-<p>Load all those libraries and you should receive no error. Please
-contact us in case some issues come up with this topic.</p>
+<div id="course-description" class="section level4">
+<h4>Course description:</h4>
+<p>Kinship is a fundamental property of human populations and a key form
+of social structure. Demographers have long been interested in the
+interplay between demographic change and family configuration. This has
+led to the development of sophisticated methodological and conceptual
+approaches for the study of kinship, some of which are reviewed in this
+course.</p>
+<ul>
+<li>Download the syllabus: <a href="https://github.com/alburezg/EDSD_2023_kinship_demography/EDSD_2023_kinship.pdf" class="uri">https://github.com/alburezg/EDSD_2023_kinship_demography/EDSD_2023_kinship.pdf</a></li>
+<li>See the source code on GitHub: <a href="https://github.com/alburezg/EDSD_2023_kinship_demography" class="uri">https://github.com/alburezg/EDSD_2023_kinship_demography</a></li>
+</ul>
 <!-- --------------------------------------------------------------------- -->
 </div>
 </div>
-<div id="thurs-4" class="section level3">
-<h3>Thurs 4</h3>
-<div id="matrix-population-models" class="section level4">
-<h4>Matrix population models</h4>
-<p>In this section…</p>
-<div id="r-clues" class="section level5">
-<h5>R-clues</h5>
-<p>…</p>
-</div>
-<div id="practice" class="section level5">
-<h5>Practice</h5>
-<p>…</p>
+<div id="lab-session-1-tuesday" class="section level3">
+<h3>Lab session 1 (Tuesday)</h3>
 <!-- --------------------------------------------------------------------- -->
 </div>
-</div>
-</div>
-<div id="mon-8" class="section level3">
-<h3>Mon 8</h3>
-<div id="age-classified-time-invariant-one-sex-kinship-models" class="section level4">
-<h4>Age-classified time-invariant one-sex kinship models</h4>
-<p>In this section…</p>
-<div id="r-clues-1" class="section level5">
-<h5>R-clues</h5>
-<p>Imagine you are studying a female population with 5 ages (from 0 to
-4) and fixed survival probabilities and fertility rates, given by:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>age <span class="ot">&lt;-</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">4</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">9</span>, .<span class="dv">7</span>, .<span class="dv">4</span>, .<span class="dv">1</span>, <span class="dv">0</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">2</span>, .<span class="dv">5</span>, .<span class="dv">3</span>, <span class="dv">0</span>)</span></code></pre></div>
-<p>Let´s build the transition matrix <span class="math inline">\(U\)</span> and <span class="math inline">\(f\)</span>. The fertility transition matrix should
-be a capitol letter but R has this letter reserved.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ages <span class="ot">=</span> <span class="fu">length</span>(age)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>U <span class="ot">=</span> f <span class="ot">=</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow=</span>ages, <span class="at">ncol=</span>ages)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>U[<span class="fu">row</span>(U)<span class="sc">-</span><span class="dv">1</span> <span class="sc">==</span> <span class="fu">col</span>(U)] <span class="ot">&lt;-</span> p[<span class="sc">-</span>ages]</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>U[ages, ages] <span class="ot">=</span> p[ages]</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>f[<span class="dv">1</span>,] <span class="ot">=</span> m</span></code></pre></div>
-<p>Now find eigenvalues and eigenvectors for having the stable
-distribution by age <span class="math inline">\(w\)</span>, and then the
-ones for mothers <span class="math inline">\(pi\)</span>.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>A <span class="ot">=</span> U <span class="sc">+</span> f</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>A_eigen <span class="ot">=</span> <span class="fu">eigen</span>(A)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>A_eigen_value <span class="ot">=</span> <span class="fu">as.double</span>(A_eigen<span class="sc">$</span>values[<span class="dv">1</span>])</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>A_eigen_vector <span class="ot">=</span> <span class="fu">as.double</span>(A_eigen<span class="sc">$</span>vectors[,<span class="dv">1</span>])</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>w <span class="ot">=</span> A_eigen_vector<span class="sc">/</span><span class="fu">sum</span>(A_eigen_vector)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>pi <span class="ot">=</span> w<span class="sc">*</span>m<span class="sc">/</span><span class="fu">sum</span>(w<span class="sc">*</span>m)</span></code></pre></div>
-<p>Let´s focus in the mother.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>e <span class="ot">=</span> <span class="fu">diag</span>(<span class="dv">1</span>, ages)</span></code></pre></div>
-</div>
-<div id="using-demokin" class="section level5">
-<h5>Using DemoKin</h5>
-<p>Let´s see how to solve exercise 1 with DemoKin.</p>
-<ol style="list-style-type: decimal">
-<li><p>Project the pop… <span class="citation">(Caswell
-2019)</span></p></li>
-<li><p>Give a value for…</p></li>
-<li><p>Focal lives in…</p></li>
-</ol>
-</div>
-<div id="practice-1" class="section level5">
-<h5>Practice</h5>
-<ol start="3" style="list-style-type: decimal">
-<li>Imagine a world where…</li>
-</ol>
+<div id="lab-session-1-wednesday" class="section level3">
+<h3>Lab session 1 (Wednesday)</h3>
 <!-- --------------------------------------------------------------------- -->
 </div>
-</div>
-</div>
-<div id="tues-9" class="section level3">
-<h3>Tues 9</h3>
-<div id="age-classified-time-variant-one-sex-kinship-models" class="section level4">
-<h4>Age-classified time-variant one-sex kinship models</h4>
-<p>In this section…</p>
-<div id="r-clues-2" class="section level5">
-<h5>R-clues</h5>
-<ol style="list-style-type: decimal">
-<li>Project the pop…</li>
-</ol>
-</div>
-<div id="using-demokin-1" class="section level5">
-<h5>Using DemoKin</h5>
-<p>Let´s see how to solve exercise 1 with DemoKin.</p>
-<ol style="list-style-type: decimal">
-<li><p>Project the pop…</p></li>
-<li><p>Give a value for…</p></li>
-<li><p>Focal lives in…</p></li>
-</ol>
-</div>
-<div id="practice-2" class="section level5">
-<h5>Practice</h5>
-<ol start="3" style="list-style-type: decimal">
-<li>Imagine a world where…</li>
-</ol>
+<div id="assignment" class="section level3">
+<h3>Assignment</h3>
 <!-- --------------------------------------------------------------------- -->
 </div>
-</div>
-</div>
-<div id="wed-10" class="section level3">
-<h3>Wed 10</h3>
-<div id="age-classified-time-invariant-two-sex-kinship-models" class="section level4">
-<h4>Age-classified time-invariant two-sex kinship models</h4>
-<p>In this section…</p>
-<div id="r-clues-3" class="section level5">
-<h5>R-clues</h5>
-<ol style="list-style-type: decimal">
-<li>Project the pop…</li>
-</ol>
-</div>
-<div id="using-demokin-2" class="section level5">
-<h5>Using DemoKin</h5>
-<p>Let´s see how to solve exercise 1 with DemoKin.</p>
-<ol style="list-style-type: decimal">
-<li><p>Project the pop…</p></li>
-<li><p>Give a value for…</p></li>
-<li><p>Focal lives in…</p></li>
-</ol>
-</div>
-<div id="practice-3" class="section level5">
-<h5>Practice</h5>
-<ol start="3" style="list-style-type: decimal">
-<li>Imagine a world where…</li>
-</ol>
-<!-- --------------------------------------------------------------------- -->
-</div>
-</div>
-</div>
-<div id="thurs-11" class="section level3">
-<h3>Thurs 11</h3>
-<div id="multistate-kinship-models-with-applications-to-health" class="section level4">
-<h4>Multistate kinship models with applications to health</h4>
-<p>In this section…</p>
-<div id="r-clues-4" class="section level5">
-<h5>R-clues</h5>
-<ol style="list-style-type: decimal">
-<li>Project the pop…</li>
-</ol>
-</div>
-<div id="using-demokin-3" class="section level5">
-<h5>Using DemoKin</h5>
-<p>Let´s see how to solve exercise 1 with DemoKin.</p>
-<ol style="list-style-type: decimal">
-<li><p>Project the pop…</p></li>
-<li><p>Give a value for…</p></li>
-<li><p>Focal lives in…</p></li>
-</ol>
-</div>
-<div id="practice-4" class="section level5">
-<h5>Practice</h5>
-<ol start="3" style="list-style-type: decimal">
-<li>Imagine a world where…</li>
-</ol>
-<!-- --------------------------------------------------------------------- -->
-</div>
-</div>
-</div>
-<div id="solutions" class="section level3">
-<h3>Solutions</h3>
-<!-- --------------------------------------------------------------------- -->
-</div>
-<div id="references" class="section level3 unnumbered">
-<h3 class="unnumbered">References</h3>
-<div id="refs" class="references csl-bib-body hanging-indent">
-<div id="ref-caswell_formal_2019" class="csl-entry">
-Caswell, Hal. 2019. <span>“The Formal Demography of Kinship:
-<span>A</span> Matrix Formulation.”</span> <em>Demographic Research</em>
-41 (September): 679–712. <a href="https://doi.org/10.4054/DemRes.2019.41.24">https://doi.org/10.4054/DemRes.2019.41.24</a>.
-</div>
-</div>
+<div id="references" class="section level3">
+<h3>References</h3>
 </div>
 </div>
 
