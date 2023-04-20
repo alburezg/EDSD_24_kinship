@@ -15,7 +15,13 @@ bibliography: kinship.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE, 
+                      warning = FALSE, 
+                      fig.align='center')
+
+# Prevent scientific notation (useful for the rate calculation)
+options(scipen=999999)
 ```
 
 ## {.tabset}
@@ -29,21 +35,1058 @@ Demographers have long been interested in the interplay between demographic chan
 This has led to the development of sophisticated methodological and conceptual approaches for the study of kinship, some of which are reviewed in this course. 
 
 - Download the syllabus: https://github.com/alburezg/EDSD_2023_kinship_demography/EDSD_2023_kinship.pdf
-- See the source code on GitHub: https://github.com/alburezg/EDSD_2023_kinship_demography
+- Find this website's source code on GitHub: https://github.com/alburezg/EDSD_2023_kinship_demography
 
 
 <!-- --------------------------------------------------------------------- -->
 
 ### Lab session 1 (Tuesday)
 
+#### Getting started with matrix kinship models in R using DemoKin
+
+<img src="DemoKin-Logo.png" align="right" width="200" />
+
+#### 1. Installation
+
+Install the [development version from GitHub](https://github.com/IvanWilli/DemoKin) (could take ~1 minute). We made changes to the `DemoKin` package ahead of this workshop If you had already installed the package, please uninstall it and and install it again.
+
+```{r, eval=FALSE}
+# remove.packages("DemoKin")
+# install.packages("devtools")
+devtools::install_github("IvanWilli/DemoKin", build_vignettes = TRUE)
+```
+
+Load packages: 
+
+```{r, warning=F, message=FALSE}
+library(DemoKin)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(fields)
+```
+
+#### 2. Built-in data
+
+The `DemoKin` package includes data from Sweden as an example. 
+The data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). 
+These datasets were loaded using the`DemoKin::get_HMDHFD` function.
+
+##### 2.1. `swe_px` matrix; survival probabilities by age (DemoKin's *U* argument)
+
+This is what the data looks like:
+
+```{r}
+data("swe_px", package="DemoKin")
+
+swe_px[1:4, 1:4]
+```
+
+And plotted over time and age:
+
+```{r}
+
+image.plot(
+  x = as.numeric(colnames(swe_px))
+  , y = 0:nrow(swe_px)
+  , z = t(as.matrix(swe_px))
+  , xlab = "Year"
+  , ylab = "Survival probability"
+  )
+```
+
+##### 2.2. `swe_asfr` matrix; age specific fertility rate (DemoKin's *f* argument)
+
+This is what the data looks like:
+
+```{r}
+data("swe_asfr", package="DemoKin")
+
+swe_asfr[15:20, 1:4]
+```
+
+And plotted over time and age:
+
+```{r}
+image.plot(
+  x = as.numeric(colnames(swe_asfr))
+  , y = 0:nrow(swe_asfr)
+  , z = t(as.matrix(swe_asfr))
+  , xlab = "Year"
+  , ylab = "Age-specific fertility (f)"
+  )
+```
+
+#### 3. The function `kin()`
+
+`DemoKin` can be used to compute the number and age distribution of Focal's relatives under a range of assumptions, including living and deceased kin. The function `DemoKin::kin()` currently does most of the heavy lifting in terms of implementing matrix kinship models. 
+This is what it looks like in action, in this case assuming time-invariant demographic rates:
+
+```{r}
+# First, get vectors for a given year
+swe_surv_2015 <- DemoKin::swe_px[,"2015"]
+swe_asfr_2015 <- DemoKin::swe_asfr[,"2015"]
+# Run kinship models
+swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
+```
+
+###### 3.1. Arguments
+
+- **U** numeric. A vector (atomic) or matrix of survival probabilities with rows as ages (and columns as years in case of matrix).
+- **f** numeric. Same as U but for fertility rates.
+- **time_invariant** logical. Assume time-invariant rates. Default TRUE.
+- **output_kin** character. kin types to return: "m" for mother, "d" for daughter, ...
+
+##### 3.2. Relative types
+
+Relatives for the `output_kin` argument are identified by a unique code.
+Note that the relationship codes used in `DemoKin` differ from those in Caswell [-@caswell_formal_2019]. 
+The equivalence between the two set of codes is given in the following table:
+
+```{r}
+
+demokin_codes()
+```
+
+###### 3.4. Value
+
+`DemoKin::kin()` returns a list containing two data frames: `kin_full` and `kin_summary`. 
+
+```{r}
+str(swe_2015)
+```
+
+###### `kin_full` 
+
+This data frame contains expected kin counts by year (or cohort), age of Focal, and age of kin. 
+
+```{r}
+head(swe_2015$kin_full)
+```
+
+###### `kin_summary`
+
+This is a 'summary' data frame derived from `kin_full`. To produce it, we sum over all ages of kin to produce a data frame of expected kin counts by year or cohort and age of Focal (but *not* by age of kin). 
+This is how the `kin_summary` object is derived:
+
+```{r, message=F}
+kin_by_age_focal <- 
+  swe_2015$kin_full %>% 
+  group_by(cohort, kin, age_focal) %>% 
+  summarise(count = sum(living)) %>% 
+  ungroup()
+
+# Check that they are identical (for living kin only here)
+
+kin_by_age_focal %>% 
+  select(cohort, kin, age_focal, count) %>% 
+  identical(
+    swe_2015$kin_summary %>% 
+      select(cohort, kin, age_focal, count = count_living) %>% 
+      arrange(cohort, kin, age_focal)
+  )
+
+```
+
+#### 4. Example: kin counts in time-invariant populations
+
+Following Caswell [-@caswell_formal_2019], we assume a female closed population in which everyone experiences the Swedish 1950 mortality and fertility rates at each age throughout their life.
+We then ask:
+
+> How can we characterize the kinship network of an average member of the population (call her 'Focal')?
+
+For this exercise, we'll use the pre-loaded Swedish data.
+
+```{r}
+# First, get vectors for a given year
+swe_surv_2015 <- DemoKin::swe_px[,"2015"]
+swe_asfr_2015 <- DemoKin::swe_asfr[,"2015"]
+# Run kinship models
+swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
+```
+
+##### 4.1. 'Keyfitz' kinship diagram
+
+We can visualize the implied kin counts for a Focal woman aged 35 yo in a time-invariant population using a network or 'Keyfitz' kinship diagram [@Keyfitz2005] with the `plot_diagram` function:
+
+```{r, fig.height=10, fig.width=12}
+swe_2015$kin_summary %>% 
+  filter(age_focal == 35) %>% 
+  select(kin, count = count_living) %>% 
+  plot_diagram(rounding = 2)
+```
+
+##### 4.2. Living kin
+
+Now, let's visualize how the expected number of daughters, siblings, cousins, etc., changes over the lifecourse of Focal (now, with full names to identify each relative type using the function `DemoKin::rename_kin()`).
+
+```{r, fig.height=6, fig.width=8}
+swe_2015$kin_summary %>%
+  rename_kin() %>% 
+  ggplot() +
+  geom_line(aes(age_focal, count_living))  +
+  geom_vline(xintercept = 35, color=2)+
+  theme_bw() +
+  labs(x = "Focal's age") +
+  facet_wrap(~kin)
+```
+
+> Note that we are working in a time invariant framework. You can think of the results as analogous to life expectancy (i.e., expected years of life for a synthetic cohort experiencing a given set of period mortality rates).
+
+How does overall family size (and family composition) vary over life for an average woman who survives to each age?
+
+```{r}
+counts <- 
+  swe_2015$kin_summary %>%
+  group_by(age_focal) %>% 
+  summarise(count = sum(count_living)) %>% 
+  ungroup()
+
+swe_2015$kin_summary %>%
+  select(age_focal, kin, count_living) %>% 
+  rename_kin(., consolidate_column = "count_living") %>%
+  ggplot(aes(x = age_focal, y = count)) +
+  geom_area(aes(fill = kin), colour = "black") +
+  geom_line(data = counts, size = 2) +
+  labs(x = "Focal's age", y = "Number of living female relatives") +
+  coord_cartesian(ylim = c(0, 6)) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+##### 4.3. Age distribution of living kin
+
+How old are Focal's relatives? Using the `kin_full` data frame, we can visualize the age distribution of Focal's relatives throughout Focal's life. For example when Focal is 35, what are the ages of her relatives:
+
+
+```{r, fig.height=6, fig.width=8}
+swe_2015$kin_full %>%
+DemoKin::rename_kin() %>%
+filter(age_focal == 35) %>%
+ggplot() +
+geom_line(aes(age_kin, living)) +
+geom_vline(xintercept = 35, color=2) +
+labs(y = "Expected number of living relatives") +
+theme_bw() +
+facet_wrap(~kin)
+
+```
+
+##### 4.4. Deceased kin
+
+We have focused on living kin, but what about relatives who have died during her life? 
+The output of `kin` also includes information of kin deaths experienced by Focal.
+
+We start by considering the number of kin deaths that can expect to experience at each age. In other words, the non-cumulative number of deaths in the family that Focal experiences at a given age.  
+
+```{r}
+loss1 <- 
+  swe_2015$kin_summary %>%
+  filter(age_focal>0) %>%
+  group_by(age_focal) %>% 
+  summarise(count = sum(count_dead)) %>% 
+  ungroup()
+
+swe_2015$kin_summary %>%
+  filter(age_focal>0) %>%
+  group_by(age_focal, kin) %>% 
+  summarise(count = sum(count_dead)) %>% 
+  ungroup() %>% 
+  rename_kin(., consolidate_column = "count") %>% 
+  ggplot(aes(x = age_focal, y = count)) +
+  geom_area(aes(fill = kin), colour = "black") +
+  geom_line(data = loss1, size = 2) +
+  labs(x = "Focal's age", y = "Number of kin deaths experienced at each age") +
+  coord_cartesian(ylim = c(0, 0.086)) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+Now, we combine all kin types to show the cumulative burden of kin death for an average member of the population surviving to each age:
+
+```{r}
+loss2 <- 
+  swe_2015$kin_summary %>%
+  group_by(age_focal) %>% 
+  summarise(count = sum(count_cum_dead)) %>% 
+  ungroup()
+
+
+swe_2015$kin_summary %>%
+  group_by(age_focal, kin) %>% 
+  summarise(count = sum(count_cum_dead)) %>% 
+  ungroup() %>% 
+  rename_kin(., consolidate = "count") %>% 
+  ggplot(aes(x = age_focal, y = count)) +
+  geom_area(aes(fill = kin), colour = "black") +
+  geom_line(data = loss2, size = 2) +
+  labs(x = "Focal's age", y = "Number of kin deaths experienced (cumulative)") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+A member of the population aged 15, 50, and 65yo will have experienced, on average, the death of `r loss2 %>% filter(age_focal %in% c(15, 50, 65)) %>% pull(count) %>% round(1) %>% paste(., collapse = ", ")` relatives, respectively. 
+
+#### 5. Exercises
+
+**For all exercises, assume time-invariant rates at the 2010 levels in Sweden and a female-only population. All exercises can be completed using datasets included in DemoKin.**
+
+##### Exercise 1. Offspring availability and loss
+
+Use `DemoKin` (assuming time-invariant rates at the 2010 levels in Sweden and a female-only population) to explore offspring survival and loss for mothers. 
+
+**Answer**:  What is the expected number of surviving offspring for an average woman aged 65?
+
+```{r}
+# Write your code here
+```
+
+**Answer**: What is the cumulative number of offspring deaths experienced by an average woman who survives to age 65?
+
+```{r}
+# Write your code here
+```
+
+
+
+##### Exercise 2. Mean age of kin
+
+The output of `DemoKin::kin` includes information on the average age of Focal's relatives (in the columns `kin_summary$mean_age` and `kin_summary$$sd_age`). For example, this allows us to determine the mean age of Focal's sisters over the lifecourse of Focal: 
+
+```{r}
+
+swe_2015$kin_summary %>%  
+  filter(kin %in% c("os", "ys")) %>% 
+  rename_kin() %>% 
+  select(kin, age_focal, mean_age, sd_age) %>% 
+  pivot_longer(mean_age:sd_age) %>% 
+  ggplot(aes(x = age_focal, y = value, colour = kin)) +
+  geom_line() +
+  facet_wrap(~name, scales = "free") +
+  labs(y = "Mean age of sister(s)") +
+  theme_bw()
+```
+
+**Instructions**
+
+Compute the the mean and SD of the age of Focal's sisters over the ages of Focal **by hand** (i.e., using the raw output in `kin_full`). Plot separately (1) for younger and older sisters, (2) and for all sisters. 
+
+First, get mean and SD of ages of sisters distinguishing between younger and older sisters:
+
+```{r}
+# Write your code here
+```
+
+Second, get ages of all sisters, irrespective of whether they are older or younger:
+
+```{r}
+# Write your code here
+```
+
+##### Exercise 3. Living mother
+
+What is the probability that Focal (an average Swedish woman) has a living mother over Focal's live? 
+
+**Instructions**
+
+Use DemoKin to obtain $M_1(a)$, the probability of having a living mother at age $a$ in a stable population. Conditional on ego's survival, $M_1{(a)}$ can be thought of as a survival probability in a life table: it has to be equal to one when $a$ is equal to zero (the mother is alive when she gives birth), and goes monotonically to zero. 
+
+**Answer:** What is the probability that Focal has a living mother when Focal turns 70 years old?
+
+```{r}
+# Write your code here
+```
+
+#### 6. Vignette and extensions
+
+For more details on `DemoKin`, including an extension to time varying-populations rates, deceased kin, and multi-state models, see `vignette("Reference", package = "DemoKin")`. If the vignette does not load, you may need to install the package as `devtools::install_github("IvanWilli/DemoKin", build_vignettes = TRUE)`.
+
+For a detailed description of extensions of the matrix kinship model, see:
+
+- time-invariant rates [@caswell_formal_2019],
+- multistate models [@caswell_formal_2020],
+- time-varying rates [@caswell_formal_2021], and
+- two-sex models [@caswell_formal_2022].
+
+
+#### 8. Session info
+
+
+```{r}
+sessionInfo()
+```
+
 <!-- --------------------------------------------------------------------- -->
 
-### Lab session 1 (Wednesday)
+### Lab session 2 (Wednesday)
+
+#### Demographic microsimulations in R using SOCSIM: Modelling population and kinship dynamics
+
+##### Introduction: What is SOCSIM and how does it work?
+
+Socsim was originally developed for Unix at UC Berkeley [@hammel_socsim_1976], where it has been maintained for decades. The current release of rsocsim aims to be Operating System-agnostic and, for the most part, back-compatible with the original Socsim distribution. For more on the original SOCSIM, see https://lab.demog.berkeley.edu/socsim/ and especially @mason2016socsim.
+
+The following description of SOCSIM was adapted from the Supplementary Materials of @alburezgutierrez_sandwich_2021. SOCSIM is an open source and extensible demographic microsimulation program. It is written in the C programming language and relies heavily on arrays of linked lists to keep track of kinship relationships and to store information about simulated individuals. The simulator takes as input initial population files and monthly age-specific fertility and mortality demographic rates. The individual is the unit of analysis of the simulator. Each person is subject to a set of rates, expressed as monthly probabilities of events, given certain demographic characteristics, like age and sex. Every month, each individual faces the risk of experiencing a number of events, including childbirth, death, and marriage. The selection of the event and the waiting time until the event occurs are determined stochastically using a competing risk model. Some other constraints are included in the simulation program in order to draw events only for individuals that are eligible for the events (e.g. to allow for a minimum interval of time between births from the same mother, to avoid social taboos such as incest, etc.). Each event for which the individual is at risk is modeled as a piece-wise exponential distribution. The waiting time until each event occurs is randomly generated according to the associated demographic rates. The individual’s next event is the one with the shortest waiting time. 
+
+At the end of the simulation, population files that contain a list of everyone who has ever lived in the population are created. In these files, each individual is an observation in a rectangular data file with records of demographic characteristics for the individual, and identification numbers for key kinship relations. SOCSIM models “closed” populations: Individuals may enter and exit the simulation only by (simulated) birth and death.
+
+SOCSIM has been used extensively in social science research to study, among other things, dynamics of kin availability [@hammel_demographic_2005; @wachter_kinship_1997; @verdery_projections_2017], generational overlap [@margolis_cohort_2019; @alburezgutierrez_sandwich_2021], and kin loss [@zagheni_impact_2011; @verdery_tracking_2020; @snyder_estimates_2022].
+
+#### 1. Setup
+
+We recommend that you go through point 1 of this tutorial **before** the start of the workshop. If you have any questions/difficulties, please get in touch with the workshop coordinator (Diego Alburez).
+
+<img src="logo.png" align="right" width="200" />
+
+##### 1.1. Installation
+
+Install the development version of `rsocsim` from GitHub (https://github.com/MPIDR/rsocsim). We may have made changes to the `rsocsim` package ahead of this workshop. To be on the safe side, if you had already installed the package, please uninstall it and and install it again.
+
+```{r, eval=FALSE}
+# remove.packages("rsocsim")
+# install.packages("devtools")
+devtools::install_github("MPIDR/rsocsim")
+```
+
+Let's see if everything is working fine. `rsocsim` has a simple built-in simulation that you can run to see if the package was installed correctly. For now, let's run the code without focusing on the technical details: 
+
+```{r, eval=TRUE}
+library(rsocsim)
+
+# create a new folder for all the files related to a simulation.
+# this will be in your home- or user-directory:
+folder = rsocsim::create_simulation_folder()
+
+# create a new supervisory-file. supervisory-files tell socsim what
+# to simulate. create_sup_file will create a very basic supervisory file
+# and it copies some rate-files that will also be needed into the 
+# simulation folder:
+supfile = rsocsim::create_sup_file(folder)
+
+# Choose a random-number seed:
+seed = 300
+
+# Start the simulation:
+rsocsim::socsim(folder,supfile,seed)
+
+```
+
+You should see a long output in the console, at the end of which is the message "Socsim done". Ignore the two warning messages ('can't open transition history file. Hope that's OK'). They are expected.
+
+For more details on the package, the SOCSIM simulator, its history and applications, see `rsocsim`'s website: https://mpidr.github.io/rsocsim/.
+
+##### 1.2. Install other packages
+
+We will need these other for this workshop (if you don't have them already, please install them): 
+
+```{r, warning=F, message=FALSE}
+# devtools::install_github("MPIDR/rsocsim")
+library(rsocsim)
+# install.packages("tidyverse")
+library(tidyverse) #For data wrangling
+# install.packages("ggh4x")
+library(ggh4x) #for extended facet plotting
+# install.packages("data.table") #for large datasets
+library(data.table)
+```
+
+#### 2. Running a simulation and retrieving the input demographic rates
+
+> Prepared by: Liliana P. Calderón-Bernal, https://twitter.com/lp_calderonb
+
+###### Objectives
+
+1. Use data from the Human Fertility Database (HFD) and Human Mortality Database (HMD) to create a simulation from scratch
+1. Run a simple SOCSIM simulation for the USA
+1. Estimate age-specific fertility and mortality rates using the SOCSIM-generated microdata
+1. Check that the 'output' SOCSIM rates match the 'input' HFD/HMD rates
+
+##### 2.1. The simulation: supervisory and rate files
+
+To provide an example of `rsocsim` usage, we will run a SOCSIM microsimulation for the United States of America (USA) over the period 1933-2020. This microsimulation uses as input: age-specific fertility rates by calendar year and year of age downloaded from the [Human Fertility Database (HFD)](https://www.humanfertility.org/), and age-specific probabilities of death by sex downloaded from the [Human Mortality Database (HMD)](https://www.mortality.org/). To run the simulation, the original [HFD](https://www.humanfertility.org/) and [HMD](https://www.mortality.org/) data must be first converted to monthly rates/probabilities and SOCSIM format as described in Socsim Oversimplified [c.f. @mason2016socsim for details]. The rates corresponding to each year are specified in the supervisory file `socsim_USA.sup`, provided in this repository, which will be used to run the simulation. The first segment of the simulation runs for 100 years (1200 months) to produce a stable age structure, based on HFD rates and HMD probabilities for 1933. Each of the following segments runs for one year (12 months) with the corresponding fertility and mortality files. 
+
+---
+nocite: |
+   @HFD, @HMD
+---
+
+##### 2.2. Write the input rate files for a SOCSIM simulation for the USA, 1933-2020
+
+The structure of the rate files is essential to run SOCSIM. According to Socsim Oversimplified [c.f. @mason2016socsim, pp. 26-28], a rate block is a complete set of age speciﬁc rates governing a demographic event for people of a particular sex, group and marital status. In the rate files, the order is always event (birth, death, marriage), group (1, ..), sex (F or M), and marital status (married, single, divorced, widowed). For the birth rates, this can be followed by number indicating parity. Each subsequent line contains a one month rate or probability and the age interval over which it holds (years and months of the upper age bound). The interval includes the upper age bound in previous line and ends just before the upper age bound in current line. The first two numbers are years and months of the upper age bound, which are added together, e.g. upper age bound of "1 0" or "0 12" refers to the first year of life [0,1). 
+
+Let's load some functions we prepared to write SOCSIM rate files from HFD and HMD.
+
+```{r function_rate_files}
+# Load functions to write SOCSIM rate files
+source("functions.R")
+```
+
+###### 2.2.1. Fertility files for SOCSIM
+
+For the input Age-Specific Female Fertility Rates, we keep the whole age range included in HFD [12-55], but limit the open-ended age intervals 12- and 55+ to one year, i.e.  [12-13) and [55-56). Additionally, SOCSIM requires a final age category with an upper bound corresponding to the maximum length of life, that we fixed to [56-110], to be consistent with HMD data.
+
+To convert the HFD annual fertility rates to 'SOCSIM' monthly fertility rates, we assume that they are constant over the year and divide them by 12 months. The are identical for all marital status, but are specified for single and married women in the rate files. Other marital status (divorced, widowed, cohabiting) follow SOCSIM's rate default rules. 
+
+For this exercise, we will use Period Age-specific fertility rates all birth orders combined, by calendar year and age for the desired country (saved in `Input/asfrRR.txt`), downloaded from the [HFD website](https://www.humanfertility.org/).
+
+The function below converts HFD data to SOCSIM format following the procedure explained above. To run it, type the name of the country as used in HFD (here, "USA").
+
+```{r write_HFD}
+write_socsim_rates_HFD(Country = "USA") 
+```
+
+###### 2.2.2. Mortality files for SOCSIM
+
+For the input Age-Specific Probabilities of Death, we keep the whole age range included in HMD [0-110+] but limit the open-ended age interval 110+ to one year, i.e. [110-111). Originally, SOCSIM had an upper bound of 100 years, but in `rsocsim` the maximum age has been extended to 200 years. 
+
+We use the probabilities of death (qx) by sex from from  [HMD](https://www.mortality.org/) period life tables, that had been already smoothed for ages 80 and older, at which observed death rates M(x) display considerable random variation [For details, see the HMD Methods Protocol @wilmoth_methods_2021, pp. 34-36].  
+
+To convert the annual HMD probabilities to monthly 'SOCSIM' probabilities, we assume that the probability of dying is constant over the year and use the formula $1-(1-_nq_x)^{1/n}$ proposed by Kenneth Watcher [@wachter2014essential, p. 53]. For the open-ended age interval 110+, monthly probabilities are equal to 1/12. The probabilities of death are identical for all marital status of each sex, and are only specified for single women and single men in the rate files. Other marital status will follow SOCSIM's rate default rules. 
+
+To write the input mortality files, please use the file `Input/ltfper_1x1.txt` (period life tables 1x1, Age interval × Year interval, for females and males for the U.S.A) downloaded from the [HMD website](https://www.mortality.org/).
+
+The function below converts HMD data to SOCSIM format following the procedure explained above. To run it, type the name of the country as used in HMD (here, "USA").
+
+```{r write_HMD}
+write_socsim_rates_HMD(Country = "USA")
+```
+
+##### 2.3. Create initial population and marriage files
+
+Now that we have the rate files, let's create the initial population (.opop) and marriage (.opop) files. The initial .opop will have a size of 20000, with randomly assigned sex and dates of birth, and group 1 for all. Other columns will be completed during the simulation. The initial .omar will be an empty file.
+
+```{r init_opop}
+# Set size of initial population
+size_opop <-  20000
+
+# Create data.frame with 14 columns and nrows = size_opop
+presim.opop <- setNames(data.frame(matrix(data = 0, ncol = 14, nrow = size_opop)), 
+                        c("pid","fem","group","nev","dob","mom","pop",
+                          "nesibm","nesibp","lborn","marid","mstat","dod","fmult"))
+
+# Add pid 1:sizeopop
+presim.opop$pid <- 1:size_opop
+
+# Add sex randomly
+presim.opop$fem <- sample(0:1, nrow(presim.opop), replace = T)
+
+# Add group 1 for all individuals
+presim.opop$group <- 1
+
+# Add random dates of birth (max age around 50)
+presim.opop$dob <- sample(600:1200, nrow(presim.opop), replace = T)
+
+# Write initial population for pre-simulation (without fertility multiplier)
+write.table(presim.opop, "presim.opop", row.names = F, col.names = F)
+
+
+## Create an empty data frame for presim.omar
+presim.omar <- data.frame()
+
+# Write empty omar for pre-simulation
+write.table(presim.omar, "presim.omar", row.names = F, col.names = F)
+
+```
+
+##### 2.4. Run a SOCSIM simulation using the `rsocsim` package 
+
+Now that we have created the input rate files and the initial population and marriage files, we can run the simulation. To use the  `socsim ` function, we need to specify the folder where the supervisory and the rate files are, the name of the supervisory file for the rates retrieved from HFD and HMD (1933-2020), and a seed number for the simulation. 
+
+```{r run_simulation, echo = T, results = 'hide'}
+
+# Specify the folder where the supervisory and the rate files are. 
+# If the R session is running through the project, you can use the following command. 
+folder <- getwd()
+
+# Type the name of the supervisory file  stored in the above folder:
+supfile <- "socsim_USA.sup"
+
+# Choose a seed number (e.g., today's date) for the simulation:
+seed <- "120423"
+
+# Run a single SOCSIM-simulation with a given folder and the provided supervisory file
+# using the "future" process method
+rsocsim::socsim(folder, supfile, seed, process_method = "future")
+
+```
+
+The simulation results are ready. We can use the `read_opop` and  `read_omar` functions from the `rsocsim` package to import the output population and marriage files into `R`. 
+
+```{r read_opop_omar}
+
+## Read the opop file using the read_opop function
+opop <- rsocsim::read_opop(folder = getwd(), supfile = "socsim_USA.sup", 
+                           seed = "120423", suffix = "",  fn = NULL)
+
+## Read the omar file using the read_opop function
+omar <- rsocsim::read_omar(folder = getwd(), supfile = "socsim_USA.sup", 
+                           seed = "120423", suffix = "",  fn = NULL)
+```
+
+Let's have a glimpse on the simulated population and marriage files. 
+
+The population file (.opop) contains one record for each individual who was ever alive during the simulation. Each record (row) provides the following information for a given individual: person id (pid), sex (fem, 1 for female and 0 for male), group identifier (group), next scheduled event (nev), date of birth (dob), person id of mother (mom), person id of father (pop), person id of next eldest sibling through mother (nesibm), person id of next eldest sibling through father (nesibp), person id of last born child (lborn), id of most recent marriage in .omar ﬁle (marid), marital status at end of simulation (mstat), date of death (dod, or 0 if alive at end of simulation) and fertility multiplier (fmult). For more information on what these columns are, see: https://lab.demog.berkeley.edu/socsim/CurrentDocs/socsimOversimplified.pdf. 
+
+```{r opop}
+head(opop)
+```
+
+The marriage file (.omar) contains one record for each marriage. Each marriage record provides the following information: marriage id number (mid), wife’s person id (wpid), husband’s person id (hpid), date marriage began (dstart), date marriage ended (dend, it's 0 if in force at the end of simulation), reason marriage ended (rend), marriage id of wife’s next most recent prior marriage (wprior), marriage id of husband’s next most recent prior marriage (hprior).
+
+```{r omar}
+head(omar)
+```
+
+##### 2.5. Estimate age-specific rates from the SOCSIM microsimulation
+
+To check the accuracy of our microsimulation for the USA, we can estimate and compare input and output age-specific fertility and mortality rates (ASFR and ASMR) by sex. For this purpose, we can use the `estimate_fertility_rates` and `estimate_mortality_rates` functions from the package. Please note that these calculate age-specific rates for both fertility and mortality, as they use mid-year population size by sex and age as an estimate of person-years lived during the year. Hence, the population in the denominator includes all those who were born before the $1^{st}$ of July of a given year and die in or after July of that year or are still alive at the end of the simulation. Due to the limited population size in a microsimulation (especially, of survivors at old ages), sometimes few or no individuals of a specific age are alive at a exact point in time (here, 1st July). Hence, it is possible to obtain rates higher than 1, equal to 0 (0 Events/Population), infinite (Events/0 Population) and NaN (0 Events/0 Population) values with these functions.  
+To run them, we need to define some arguments: the .opop file `opop`, final year of the simulation `final_sim_year`, the minimum and maximum years for which we want to estimate the rates, [`year_min` and `year_max`), the size of the year group `year_group`, the minimum and maximum age for fertility [`age_min_fert` and `age_max_fert`) or the maximum age for mortality `age_max_mort`) and the size of the age group `age_group`. We can compute the rates by different year and age groups (e.g., 1, 5, or 10), but please check that the minimum and maximum years and ages correspond to the groups size. Let's run the code. 
+
+
+```{r estimate rates}
+
+# Estimate age-specific fertility rates
+asfr_sim <- rsocsim::estimate_fertility_rates(opop = opop,
+                                             final_sim_year = 2020, #[Jan-Dec]
+                                             year_min = 1935, # Closed [
+                                             year_max = 2020, # Open )
+                                             year_group = 5, 
+                                             age_min_fert = 10, # Closed [
+                                             age_max_fert = 55, # Open )
+                                             age_group = 5) #[,)
+
+# Estimate age-specific mortality rates
+asmr_sim <- rsocsim::estimate_mortality_rates(opop = opop, 
+                                             final_sim_year = 2020, # [Jan-Dec]
+                                             year_min = 1935, # Closed
+                                             year_max = 2020, # Open )
+                                             year_group = 5,
+                                             age_max_mort = 110, # Open )
+                                             age_group = 5) #[,)
+
+```
+
+We can now plot our SOCSIM-derived estimates of ASFR and ASMR for women in some selected years.
+
+```{r Plot_ASFR_ASMR, eval = TRUE}
+# Choose years to plot (in intervals).
+yrs_plot <- c("[1935,1940)", "[1980,1985)", "[2015,2020)") 
+
+# Get the age levels to define them before plotting and avoid wrong order
+age_levels <- levels(asmr_sim$age)
+
+bind_rows(asfr_sim %>%
+            mutate(rate = "ASFR",                   
+                   sex = "female"),
+          asmr_sim %>% 
+            mutate(rate = "ASMR") %>% 
+            filter(sex == "female")) %>% 
+  mutate(age = factor(as.character(age), levels = age_levels)) %>% 
+  # Filter rates of 0, infinite (N_Deaths/0_Pop) and NaN (0_Deaths/0_Pop) values
+  filter(socsim !=0 & !is.infinite(socsim) & !is.nan(socsim)) %>% 
+  filter(year %in% yrs_plot) %>% 
+  ggplot(aes(x = age, y = socsim, group = year, colour = year)) +
+  geom_line(linewidth = 1) +
+  facet_wrap(. ~ rate, scales = "free") + 
+  facetted_pos_scales(y = list(ASFR = scale_y_continuous(),
+                               ASMR =  scale_y_continuous(trans = "log10"))) +
+  theme_bw() +
+  scale_x_discrete(guide = guide_axis(angle = 90)) +
+  labs(title = "Age-Specific Fertility and Mortality Rates for Women in the USA \n retrieved from a SOCSIM microsimulation, 1933-2020",
+       x = "Age", y = "Estimate")
+
+
+```
+
+##### 2.6. Compare age-specific rates SOCSIM vs HFD/HMD
+
+As an additional check, we can compare the age-specific fertility and mortality rates retrieved from the SOCSIM output with the original HFD and HMD data used as input for our microsimulation. Since our estimates of fertility and mortality rates from SOCSIM output are grouped by 5-year age groups and 5-year calendar periods in the previous example, we should first estimate the aggregated measures (5x5) from the original HFD and HMD data. For plotting the data together, we also need some data wrangling.
+
+Let's start with fertility estimates.
+
+```{r Comparison_input-output_fertility}
+
+# Extract year and age breaks used in the estimate_fertility_rates() to apply the same values to HFD data
+# Year breaks. Extract all the unique numbers from the intervals. 
+year_breaks_fert <- unique(as.numeric(str_extract_all(asfr_sim$year, "\\d+", simplify = T)))
+
+# Year range to filter HFD data
+year_range_fert <- min(year_breaks_fert):max(year_breaks_fert-1)
+
+# Age breaks of fertility rates. Extract all the unique numbers from the intervals 
+age_breaks_fert <- unique(as.numeric(str_extract_all(asfr_sim$age, "\\d+", simplify = T)))
+
+# Read the same HFD file used to write the input fertility files
+HFD <- read.table(file = "Input/USAasfrRR.txt", 
+                  as.is=T, header=T, skip=2, stringsAsFactors=F)
+
+# Wrangle data and compute monthly fertility rates
+HFD <- HFD %>% 
+  mutate(Age = case_when(Age == "12-" ~ "12",
+                         Age == "55+" ~ "55", 
+                         TRUE ~ Age),
+         Age = as.numeric(Age)) %>% 
+  filter(Year %in% year_range_fert) %>% 
+  mutate(year = cut(Year, breaks = year_breaks_fert, 
+                    include.lowest = F, right = F, ordered_results = T),
+         age = cut(Age, breaks = age_breaks_fert, 
+                   include.lowest = F, right = F, ordered_results = T)) %>% 
+  filter(!is.na(age)) %>% 
+  group_by(year, age) %>%
+  summarise(ASFR = mean(ASFR)) %>%
+  ungroup() %>%
+  mutate(Source = "HFD/HMD", 
+         Rate = "ASFR")
+
+# Wrangle SOCSIM data
+SocsimF <- asfr_sim %>% 
+  rename(ASFR = socsim) %>% 
+  mutate(Source = "SOCSIM",
+         Rate = "ASFR")
+
+```
+
+Then, the mortality estimates. Here, we compare the SOCSIM mid-year ASMR with central death rates from HMD life tables.
+
+```{r Input-output_mortality}
+
+# Extract year and age breaks used in the estimate_mortality_rates() to apply the same values to HMD data
+# Year breaks. Extract all the unique numbers from the intervals 
+year_breaks_mort <- unique(as.numeric(str_extract_all(asmr_sim$year, "\\d+", simplify = T)))
+
+# Year range to filter HMD data
+year_range_mort <- min(year_breaks_mort):max(year_breaks_mort-1)
+
+# Age breaks of mortality rates. Extract all the unique numbers from the intervals 
+age_breaks_mort <- unique(as.numeric(str_extract_all(asmr_sim$age, "\\d+", simplify = T)))
+
+
+# Read the same HMD female life table 1x1 file used to write the input mortality files
+ltf <- read.table(file="Input/fltper_1x1.txt",
+                  as.is=T, header=T, skip=2, stringsAsFactors=F)
+
+# Read the same HMD male life table 1x1 file used to write the input mortality files
+ltm <- read.table(file="Input/mltper_1x1.txt",
+                  as.is=T, header=T, skip=2, stringsAsFactors=F)
+
+# Wrangle HMD life tables
+HMD <- ltf %>%
+  select(Year, Age, mx) %>%
+  mutate(Sex = "Female") %>% 
+  bind_rows(ltm %>% 
+              select(Year, Age, mx) %>%  
+              mutate(Sex = "Male")) %>% 
+  mutate(Age = ifelse(Age == "110+", "110", Age),
+         Age = as.numeric(Age)) %>% 
+  filter(Year %in% year_range_mort) %>% 
+  mutate(year = cut(Year, breaks = year_breaks_mort, 
+                    include.lowest = F, right = F, ordered_results = T),
+         age = cut(Age, breaks = age_breaks_mort, 
+                   include.lowest = F, right = F, ordered_results = T)) %>%
+  filter(!is.na(age)) %>% 
+  group_by(year, Sex, age) %>% 
+  summarise(mx = mean(mx)) %>%
+  ungroup() %>% 
+    mutate(Source = "HFD/HMD",
+           Rate = "ASMR")
+
+# Wrangle SOCSIM data
+SocsimM <- asmr_sim %>% 
+  rename(mx = socsim) %>% 
+  mutate(Sex = ifelse(sex == "male", "Male", "Female"),
+         Source = "SOCSIM",
+         Rate = "ASMR") %>% 
+  select(year, Sex, age,  mx, Source, Rate)
+
+```
+
+Finally, we can plot together the age-specific fertility and mortality rates (ASFR and ASMR) from SOCSIM vs HFD and HMD for women in the USA. 
+
+```{r Plot_input-output}}
+
+## Plotting ASFR and ASMR (for females) from HFD/HMD vs SOCSIM 
+bind_rows(HFD %>% rename(Estimate = ASFR), 
+          SocsimF %>% rename(Estimate = ASFR)) %>% 
+  mutate(Sex = "Female") %>%   
+  bind_rows(HMD %>% rename(Estimate = mx),
+            SocsimM %>% rename(Estimate = mx)) %>% 
+  # Filter rates of 0, infinite (N_Deaths/0_Pop) and NaN (0_Deaths/0_Pop) values
+  filter(Estimate != 0 & !is.infinite(Estimate) & !is.nan(Estimate)) %>% 
+  filter(Sex == "Female") %>% 
+  mutate(age = factor(as.character(age), levels = age_levels)) %>%
+  filter(year %in% yrs_plot) %>% 
+  ggplot(aes(x = age, y = Estimate, group = interaction(year, Source)))+
+  facet_wrap(. ~ Rate, scales = "free") + 
+  geom_line(aes(colour = year, linetype = Source), linewidth = 1)+
+  scale_linetype_manual(values = c("HFD/HMD" = "solid","SOCSIM" = "11")) +
+  facetted_pos_scales(y = list(ASFR = scale_y_continuous(),
+                               ASMR =  scale_y_continuous(trans = "log10")))+
+  scale_x_discrete(guide = guide_axis(angle = 90)) +
+  labs(title = "Age-Specific Fertility and Mortality rates in the USA (1933-2020) \n retrieved from HFD, HMD and a SOCSIM simulation", 
+       x = "Age") + 
+  theme_bw()
+
+```
+
+
+#### 3. What can you do with simulation output? Example: estimates of bereavement
+
+> Prepared by: Mallika Snyder, https://twitter.com/mallika_snyder
+
+###### Objectives
+
+1. Learn how to analyze SOCSIM output
+1. Understand how SOCSIM records kin ties
+1. Use SOCSIM output from the previous section to describe levels of family bereavement in the USA
+
+After running our simulation code, SOCSIM provides us with a synthetic genealogy for the entire population. We know when people are born, when they die, when they marry, and who their parents and spouse are. What can we do with this information?
+
+
+One advantage of using a tool like SOCSIM is that we can identify extended kin networks, especially for more distant kin that would be hard to link together using a census or a household survey. For example, how straightforward would it be to find an individual's great-grandmother in a household survey, assuming odds of co-residence are not high? Of course, some kinds of kin are easier to identify than others, based on the information we have in SOCSIM (and some may be impossible to find). When identifying kin, we use lateral kin relationships---such as parents and children--or affinal kin relationships---such as spouses. This is the principle behind the `retrieve_kin` function included in this package, which can be used to identify kin from a variety of kin relationships (parents, grandparents, spouses, children, and much more). You can read the full documentation for this function by typing `?retrieve_kin` into your RStudio console. An important note is that the kinship terms used in this function are currently North America-specific: other regions may have very different kinship systems, which may influence kin availability. 
+ 
+ 
+In addition to enabling us to more easily identify networks, SOCSIM also provides us with valuable information about the timing of vital events, like births, deaths, and marriages, in these networks. This can help us connect changes in the vital rates that go into SOCSIM to changes in the networks that our simulated people have available to them, often at a very fine temporal level (months or years). In this workshop, we will focus on just one example--kin loss--but there are many more possible ways to use SOCSIM to study these and other questions about kinship dynamics.
+
+
+In previous research, SOCSIM has been especially helpful for studying kin loss in connection with mortality change [@zagheni_impact_2011; @verdery_tracking_2020; @snyder_estimates_2022]. Here we will focus on a simple example, changes in the rate of experiencing the loss of a relative over time. We will define as our reference group women aged 25-39 and alive in a given year: thus, the sample frame will change in each year. Note that the denominator is all women, not just those with a relative alive.
+
+In our code, we will approach this by writing a function that we will loop over each year of interest. The function will take in a year, look for the individuals of the relevant age who are alive that year, identify the years of death of their kin, and then calculate the proportion of our sample who experienced a loss. For further intuition, we will also calculate the share of women who had a relative alive in the previous year. The code is a simplified version of functions used in a previous research paper [@snyder_estimates_2022].
+
+
+
+###### 3.1. Getting our estimates
+
+The first thing we require is a helper function to identify the year of interest.
+
+```{r}
+#We won't discuss how this function works, but it uses the final simulation year (January-December)
+#and the last simulated month to convert our monthly dates into yearly ones
+asYr <- function(month, last_month=last_month, final_sim_year=final_sim_year) {
+  return(final_sim_year - trunc((last_month - month)/12))
+}
+
+```
+
+Now we can load the data and define a few relevant parameters.
+
+```{r}
+## Read the opop file using the read_opop function
+opop <- rsocsim::read_opop(folder = getwd(), supfile = "socsim_USA.sup", 
+                           seed = "120423", suffix = "",  fn = NULL)
+## Read the omar file using the read_opop function
+omar <- rsocsim::read_omar(folder = getwd(), supfile = "socsim_USA.sup", 
+                           seed = "120423", suffix = "",  fn = NULL)
+```
+
+```{r}
+#Parameters specific to this simulation: will need to be changed
+last_month <- max(opop$dob) # Last simulated month
+final_sim_year <- 2020
+```
+
+```{r}
+#Cleaning our population file
+opop <- opop %>% 
+ #Fixing dates of death for individuals still living at the end
+  mutate(dod = if_else(dod == 0, last_month, dod)) %>%
+  #Dates of birth and death in years for both individual and parents
+  mutate(dob_year = asYr(dob, last_month=last_month, final_sim_year=final_sim_year),
+         dod_year = asYr(dod, last_month=last_month, final_sim_year=final_sim_year))
+```
+
+Now that we've generated the variables we want, let's create a simple function that we can loop through.
+
+```{r}
+#Estimate annual kin loss for women aged 25-39 in a particular year
+getKinLoss <- function(year_of_interest, 
+                       opop = opop, omar = omar){
+pid_data <- opop %>%
+  #Remove those not alive in the year of interest
+  filter(data.table::between(lower = dob_year, upper = dod_year, 
+                             year_of_interest, incbounds = FALSE),
+  #Filter to women
+         fem == 1) %>%
+  #Find the age of individuals alive
+  mutate(age = year_of_interest - dob_year) %>%
+  #Filter to women aged 25-39
+  filter(data.table::between(lower = 25, upper = 39, age, 
+                             incbounds = TRUE))
+#Find vector of person IDs
+pid_vec <- pid_data$pid
+
+#Use the built-in retrieve_kin function
+#We will not identify extended kin relationships (extra_kintypes)
+#Or separate kin by sex, but both can be estimated
+kin <- rsocsim::retrieve_kin(opop = opop, omar = omar, pid = pid_vec, 
+             extra_kintypes = NULL, kin_by_sex = FALSE)
+
+#From retrieve_kin, we get a list of lists named after the type of kin
+#We loop over all types of kin included
+temp <- bind_rows(lapply(1:length(kin), function(x) {
+#Find IDs of kin
+kin2 <- unlist(kin[[x]], use.names = FALSE)
+#Attach associated person IDs
+names(kin2) <- rep(pid_vec, unlist(lapply(kin[[x]], length)))
+#Find the years of birth of kin
+attr(kin2, "kin.dob.year") <- opop$dob_year[match(kin2, opop$pid)]
+#Now find the years of death of kin
+attr(kin2, "kin.dod.year") <- opop$dod_year[match(kin2, opop$pid)]
+#Use this to find which kin were alive in the previous year
+attr(kin2, "kin.alive.before.year_of_interest") <- 
+  if_else(data.table::between(lower = attr(kin2, "kin.dob.year"), 
+                              upper = attr(kin2, "kin.dod.year"), 
+                             (year_of_interest-1), NAbounds = NA, 
+                             incbounds = FALSE), 
+          TRUE, FALSE)
+#And use that to find which kin have died in this year
+attr(kin2, "kin.death.year_of_interest") <- 
+  if_else(attr(kin2, "kin.dod.year") %in% year_of_interest, TRUE, FALSE)
+
+#Find the number of people who had a living relative in the previous year
+pid.withkin <- length(unique(names(kin2[attr(kin2,
+                                             "kin.alive.before.year_of_interest") 
+                                        == TRUE])))
+
+#Find the number of individuals who have lost a relative
+pid.losekin <- length(unique(names(kin2[attr(kin2, "kin.death.year_of_interest") 
+                                        == TRUE])))
+#Find the total number of individuals
+pid.total <- length(pid_vec)
+
+#Generate output as a tibble
+output <- tibble(kintype = names(kin[x]),
+                 year = year_of_interest,
+                 n_total = pid.total,
+                 n_losekin = pid.losekin,
+                 n_withkin = pid.withkin,
+                 pc_losekin_total = 100*(n_losekin/n_total),
+                 pc_withkin = 100*(n_withkin/n_total))
+return(output)
+}))
+}
+```
+
+Now loop through this function to generate a table with our data for each year.
+To limit the time this code will take to run, we'll look estimate kin loss at 10-year intervals between 1950 and 2010.
+
+```{r}
+#Loop through and bind rows
+full_data <- bind_rows(lapply(seq.int(from = 1950, to = 2010, 
+                                      by = 10), 
+                              function(x) getKinLoss(year_of_interest = x, 
+                                                      opop = opop, 
+                                                     omar = omar)))
+```
+
+###### 3.2. Examining our estimates
+
+```{r}
+#Clean this data slightly
+kinloss_data <- full_data %>%
+  #Clean names of kin
+  mutate(kintype = if_else(kintype == "ggparents", "Great-grandparents", 
+                           if_else(kintype == "gparents", "Grandparents", 
+                                   if_else(kintype == "gchildren", "Grandchildren",
+                                           kintype))),
+         kintype = str_to_title(kintype)) 
+```
+
+Plot population-level kin loss over time. 
+
+```{r}
+kinloss_data %>% 
+ #Create plot
+  ggplot(aes(x = year, y = pc_losekin_total, color = kintype)) + 
+  geom_line() +
+  labs(x = "Year", y = "% of women aged 25-39 who lose a relative", 
+       color = "Type of kin lost") +
+  #Fix the axes
+  scale_x_continuous(expand = c(0,0)) + 
+  scale_y_continuous(expand = c(0,0)) +
+  #Set a theme
+  theme_bw() 
+```
+
+These results show us how rates of parental loss have changed for women over time: as we would expect for this age group, the highest rates of kin loss would be for grandparents and parents. The increasing rate of grandparental loss over time, along with a similar trend for great-grandparents, could relate to increasing life expectancies during this period: as grandparents live to older ages, the chance that an individual aged 25-39 has a living grandparent increases. This is brought out in the next plot, which shows changes in kin availability (the share of the population with a living relative in the year prior) over time.
+
+```{r}
+#Plot changes in kin availability
+kinloss_data %>% 
+ #Create plot
+  ggplot(aes(x = year, y = pc_withkin, color = kintype)) + 
+  geom_line() +
+  labs(x = "Year", 
+       y = "% of women aged 25-39 with a living relative in year (t-1)",
+       color = "Type of relative") +
+  #Fix the axes
+  scale_x_continuous(expand = c(0,0)) + 
+  scale_y_continuous(expand = c(0,0)) +
+  #Set a theme
+  theme_bw() 
+```
 
 <!-- --------------------------------------------------------------------- -->
 
-### Assignment
+### Lab session 3 - Assignment (Thursday)
 
+The assignment should be completed in groups that will be defined at the start of the course.
+
+#### Description
+
+You will use data on kinship structures [@kolk_swedish_2021] to benchmark formal models of kinship.
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+kolk <- read.csv("../data/kolk_all_kin.csv", stringsAsFactors = F, skip = 3)
+```
+
+```{r, fig.cap='Average number of kin for the entire 2017 population of Sweden according to Kolk et al. (2021) using data from population registers. Kin counts refer to female and male relatives.'}
+
+levs <- c("grandchildren", "children", "nephews/nieces", "siblings", 
+          "cousins", "uncles/aunts", "grandparents")
+
+kolk %>% 
+  mutate(kin = factor(kin, levels = levs)) %>%
+  ggplot(aes(x = cohort, y = mean, group = kin, fill = kin)) +
+  geom_area(colour = "black") +
+  scale_x_continuous(labels = function(x) paste0(x, "\n (", 2017 - x, ")")) +
+  labs(
+    y = "Mean number of kin (both sexes)"
+    , x = "Focal's Birth Cohort (Sweden, both sexes) \n (Age in 2017)"
+    ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+```
+
+The figure above shows the empirical distribution of kin for the 2017 population of Sweden based on registry data. 
+Note that the figure includes female and male kin and that the sex of Focal is not specified (i.e., it is the average of all male and female individuals in the registers).
+You can download the data to reproduce the fugure from: https://github.com/alburezg/EDSD_2023_kinship_demography/tree/main/data
+
+
+For this first exercise, you should use `DemoKin' to replicate this figure. Concretely:
+
+
+- Run four iterations of the kinship model, for details on methods to approximate two-sex models, see Caswell [-@caswell_formal_2022]:
+   + One-sex model; time-invariant rates; approximate male kin using GKP factors
+   + One-sex model; time-variant rates; approximate male kin using the androgynous assumption
+   + Two-sex model; time-invariant rates
+   + Two-sex model; time-variant rates; assume demographic stability before 1968
+
+#### Exercises
+
+Using the model outputs, answer:
+
+   1. How well do your models approximate the kin counts reported by Kolk et al. (2021)? Justify your answer using quantitative measures (max 250 words and 4 figures)
+   1. Based on this exercise, discuss the advantages and drawbacks of using formal models to quantify kinship (max 250 words)
+   1. List three research questions that you would like to answer using empirical kinship data or kinship models. Be as specific as possible.
+
+```{r}
+# Write your code here
+```
 
 <!-- --------------------------------------------------------------------- -->
 
