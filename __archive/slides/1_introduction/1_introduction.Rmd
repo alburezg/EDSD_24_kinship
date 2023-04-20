@@ -1,0 +1,46 @@
+---
+title: "1 - Introduction to kinship demography"
+author: | 
+  | Diego Alburez-Gutierrez
+  | MPIDR
+  | European Doctoral School of Demography 2022-23
+date: "24 April 2023"
+output: 
+   beamer_presentation:
+      includes:
+         in_header: header_pagenrs.tex
+urlcolor: blue
+---
+
+## Agenda
+
+1. Course setup and final assignment
+1. Introduction to kinship demography
+1. **Break**
+1. Current topics
+
+# Course setup
+
+## Lectures
+
+- Monday 09:30-11:00 - “Introduction to kinship demography”
+- Tuesday 09:30-11:00 - “The formal demography of kinship”
+- Wednesday 09:30-11:00 -  “Kinship microsimulations”
+- Thursday 09:30-11:00  - “Empirical studies of kinship”
+- Friday - No class
+
+## Lab sessions
+
+- Tuesday 11:30-13:30 - "DemoKin"
+- Wednesday 11:30-13:30 - "rsocsim"
+
+## Final assignment
+
+- Hands-on experience using models of kinship
+- Benchmarking using real-world data
+- Due Sunday, April 30 at midnight
+
+**See full instructions in syllabus!**
+
+# Introduction to kinship demography
+

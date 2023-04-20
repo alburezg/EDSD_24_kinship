@@ -1,0 +1,126 @@
+---
+title: "Video 3: Introduction to demographic microsimulation"
+subtitle: "Day 3: Online genealogies and demographic microsimulation"  
+author: | 
+  | Diego Alburez-Gutierrez
+  | Topics in Digital and Computational Demography (IDEM 187)
+  | International Max Planck Research School for Population, Health and Data Science (IMPRS-PHDS)
+date: "11 November 2020"
+output: 
+   beamer_presentation:
+      includes:
+         in_header: header_pagenrs.tex
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse); library(knitr)
+```
+
+## Agenda
+
+1. Introduction to the SOCSIM microsimulator
+1. Pros and cons of simulations
+1. Accessing SOCSIM
+
+## Reading for videos 3-4
+
+| Verdery, A.M., Smith-Greenaway, E., Margolis, R., and Daw, J. (2020). *Tracking the reach of COVID-19 kin loss with a bereavement multiplier applied to the United States*. Proceedings of the National Academy of Sciences 117(30):17695–17701. doi: https://doi.org/10.1073/pnas.2007476117.
+
+## Demographic microsimulation
+
+- Model individual-level demographic behaviour using set of rules
+- Manufacture individual-level data
+- Simple inputs
+- Different alternatives:
+   + SOCSIM
+   + CAMSIM
+   + R/python
+   + Agent-based modelling: more tomorrow! 
+
+<!-- \tiny Grow, A and  Van Bavel, J. 2018. Agent-Based Modeling of Family Formation and Dissolution. In R. Schoen (Ed.), Analytical Family Demography (pp. 125-156). Springer Series on Demographic Methods and Population Analysis, (Vol. 47), Cham: Springer International Publishing.  -->
+
+
+## Demographic microsimulations with SOCSIM
+
+- A stochastic microsimulation platform, 1970s at UC Berkeley
+- Starts with initial population
+- Each simulated individual experiences specific rates every month (e.g., mortality, fertility, marriage)
+- Keeps track of kinship ties to create a full genealogy
+- **UC Berkeley SOCSIM User Manual**\footnote{\tiny Mason, C. (2016). SOCSIM Oversimplified. UC Berkeley. https://lab.demog.berkeley.edu/socsim/CurrentDocs/socsimOversimplified.pdf}
+
+## SOCSIM
+
+![SOCSIM interface in UC Berkeley Unix server](../resources/socsim.PNG){width=300px}
+
+## Input data for SOCSIM microsimulation
+
+1. User-provided
+   1. Initial population
+   1. Age-specific fertility rates
+   1. Age-specific mortality rates
+
+1. Optional or default parameters available
+   1. Marriage transition rates
+   1. Model for marriage market
+   1. Other transition rates
+   1. Other parameters (inheritance of fertility, etc.)
+
+## Output of a SOCSIM microsimulation\footnote{\tiny Zagheni, E. 2017. The Demographic Foundations of the Lived Experience of Kin Death. Working paper.} 
+<!-- of Sweden (1603-2160) -->
+
+``` {r, include = T, warning = F, message = F, echo=T}
+library(knitr)
+
+read.csv("../../Assignment/Data/sweden_socsim.csv", 
+         nrows = 6) %>% 
+  kable()
+```
+
+<!-- ## Calibration -->
+
+## Pioneering work using demographic microsimulation
+
+![Age at first parent's death, US whites born 1900-1980\footnote{Wachter, K.W. (1997). Kinship resources for the elderly. Philosophical Transactions of the Royal Society of London. Series B: Biological Sciences 352(1363):1811–1817.}](../resources/wachter.png){width=300px}
+
+<!-- Zagheni, E. (2011). The Impact of the HIV/AIDS Epidemic on Kinship Resources for Orphans in Zimbabwe. Population and Development Review 37(4):761–783. doi:10.1111/j.1728-4457.2011.00456.x. -->
+
+<!-- Verdery, A.M. and Margolis, R. (2017). Projections of white and black older adults without living kin in the United States, 2015 to 2060. Proceedings of the National Academy of Sciences 114(42):11109–11114. doi:10.1073/pnas.1710341114 -->
+
+<!-- Verdery, A.M., Smith-Greenaway, E., Margolis, R., and Daw, J. (2020). Tracking the reach of COVID-19 kin loss with a bereavement multiplier applied to the United States. Proceedings of the National Academy of Sciences 117(30):17695–17701. doi:10.1073/pnas.2007476117. -->
+
+## Pros and cons of SOCSIM microsimulation
+
+**Strengths**
+
+- Keep track of kinship ties
+- Full genealogies
+- Low data requirements
+- Flexible and adaptable states
+
+**Limitations**
+
+- Not real populations
+- Correlated input rates
+- Computing power
+
+## When to use demographic microsimulations?
+
+- Use real data whenever possible
+- Complex inter-generational processes
+- Trace ancestry or relatedness
+- Improve the interval validity of simulations
+   + Calibration
+   + Comparing simulations to ground-truth
+   + Methodological triangulation
+
+## How to access SOCSIM?
+
+- Unix version UC Berkeley Demography Lab: https://lab.demog.berkeley.edu/socsim/
+- **New** Windows version at the Max Planck Institute for Demographic Research
+
+## Coming up in the next video...
+
+1. Studying demography and kinship with microsimulations
+1. Work in progress: Demographic Drivers of the Demand of Care-Time
