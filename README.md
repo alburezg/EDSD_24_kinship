@@ -4,9 +4,7 @@ European Doctoral School of Demography (EDSD)
 
 Barcelona, April 24-29, 2023
 
-\linebreak
-
-Instructor:
+**Instructor:**
 
 Diego Alburez-Gutierrez
 

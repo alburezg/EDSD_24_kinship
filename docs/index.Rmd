@@ -399,7 +399,7 @@ Use DemoKin to obtain $M_1(a)$, the probability of having a living mother at age
 
 #### 6. Vignette and extensions
 
-For more details on `DemoKin`, including an extension to time varying-populations rates, deceased kin, and multi-state models, see `vignette("Reference", package = "DemoKin")`. If the vignette does not load, you may need to install the package as `devtools::install_github("IvanWilli/DemoKin", build_vignettes = TRUE)`.
+For more details on `DemoKin`, including an extension to time varying-populations rates, deceased kin, and multi-state models, see `vignette("Reference_OneSex", package = "DemoKin")` and `vignette("Reference_TwoSex", package = "DemoKin")`. If the vignette does not load, you may need to install the package as `devtools::install_github("IvanWilli/DemoKin", build_vignettes = TRUE)`.
 
 For a detailed description of extensions of the matrix kinship model, see:
 
@@ -1029,7 +1029,7 @@ kinloss_data %>%
 
 ### Lab session 3 - Assignment (Thursday)
 
-The assignment should be completed in groups that will be defined at the start of the course.
+The assignment should be completed in groups that will be defined at the start of the course. **Make sure to read the instructions for the assignment in the syllabus:** https://github.com/alburezg/EDSD_2023_kinship_demography/EDSD_2023_kinship.pdf!
 
 #### Description
 
@@ -1067,16 +1067,25 @@ Note that the figure includes female and male kin and that the sex of Focal is n
 You can download the data to reproduce the fugure from: https://github.com/alburezg/EDSD_2023_kinship_demography/tree/main/data
 
 
-For this first exercise, you should use `DemoKin' to replicate this figure. Concretely:
-
-
-- Run four iterations of the kinship model, for details on methods to approximate two-sex models, see Caswell [-@caswell_formal_2022]:
-   + One-sex model; time-invariant rates; approximate male kin using GKP factors
-   + One-sex model; time-variant rates; approximate male kin using the androgynous assumption
-   + Two-sex model; time-invariant rates
-   + Two-sex model; time-variant rates; assume demographic stability before 1968
 
 #### Exercises
+
+For this first exercise, you should use `DemoKin` to replicate this figure. Concretely:
+
+
+- Run four iterations of the kinship model:
+
+   1. One-sex model; time-invariant rates; approximate male kin using GKP factors
+   1. One-sex model; time-variant rates; approximate male kin using the androgynous assumption (i.e., male fertility is equivalent to female fertility)
+   1. Two-sex model; time-invariant rates
+   1. Two-sex model; time-variant rates; assume demographic stability before 1968
+   
+Some useful tips for the exercise:
+
+   - For details on methods to approximate two-sex models, see Caswell [-@caswell_formal_2022]
+   - To learn more about two-sex models in DemoKin, run `vignette("Reference_TwoSex", package = "DemoKin")`. If the vignette does not load, you may need to install the package as `devtools::install_github("IvanWilli/DemoKin", build_vignettes = TRUE)`
+   - Mortality data can be obtained from https://www.mortality.org/
+   - Fertility data are available from https://www.humanfertility.org and (including for males) https://www.fertilitydata.org/
 
 Using the model outputs, answer:
 
@@ -1087,6 +1096,15 @@ Using the model outputs, answer:
 ```{r}
 # Write your code here
 ```
+
+#### Handing in the assignment
+
+Assignments (one per group) should be sent by email to the instructor **before midnight of Friday, April 28.** 
+You should hand in the following files:
+
+  1. An .RMD file with all your code and answers to the exercise questions
+  1. A compiled .pdf of your markdown file showing all the code
+  1. All input data needed to replicate your code 
 
 <!-- --------------------------------------------------------------------- -->
 
