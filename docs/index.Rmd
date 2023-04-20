@@ -1096,7 +1096,6 @@ Using the model outputs, answer:
 
    1. How well do your models approximate the kin counts reported by Kolk et al. (2021)? Justify your answer using quantitative measures (max 250 words and 4 figures)
    1. Based on this exercise, discuss the advantages and drawbacks of using formal models to quantify kinship (max 250 words)
-   1. List three research questions that you would like to answer using empirical kinship data or kinship models. Be as specific as possible.
 
 ```{r}
 # Write your code here
