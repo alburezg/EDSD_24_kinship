@@ -37,7 +37,7 @@ This has led to the development of sophisticated methodological and conceptual a
 Some useful things to know:
 
 - Download the syllabus: https://github.com/alburezg/EDSD_2023_kinship_demography/blob/main/EDSD_2023_kinship.pdf
-- The required readings can be downloaded from: https://nextcloud.demogr.mpg.de/s/LoiF9zbE95ow7ge
+- The required readings can be downloaded from: https://github.com/alburezg/EDSD_2023_kinship_demography/tree/main/readings
 - The course's slides are available here: https://github.com/alburezg/EDSD_2023_kinship_demography/tree/main/slides
 - Find this website's source code on GitHub: https://github.com/alburezg/EDSD_2023_kinship_demography
 
@@ -132,12 +132,12 @@ This is what it looks like in action, in this case assuming time-invariant demog
 swe_surv_2015 <- DemoKin::swe_px[,"2015"]
 swe_asfr_2015 <- DemoKin::swe_asfr[,"2015"]
 # Run kinship models
-swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
+swe_2015 <- kin(p = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
 ###### 3.1. Arguments
 
-- **U** numeric. A vector (atomic) or matrix of survival probabilities with rows as ages (and columns as years in case of matrix).
+- **p** numeric. A vector (atomic) or matrix of survival probabilities with rows as ages (and columns as years in case of matrix).
 - **f** numeric. Same as U but for fertility rates.
 - **time_invariant** logical. Assume time-invariant rates. Default TRUE.
 - **output_kin** character. kin types to return: "m" for mother, "d" for daughter, ...
@@ -195,7 +195,7 @@ kin_by_age_focal %>%
 
 #### 4. Example: kin counts in time-invariant populations
 
-Following Caswell [-@caswell_formal_2019], we assume a female closed population in which everyone experiences the Swedish 1950 mortality and fertility rates at each age throughout their life.
+Following Caswell [-@caswell_formal_2019], we assume a female closed population in which everyone experiences the Swedish 2015 mortality and fertility rates at each age throughout their life.
 We then ask:
 
 > How can we characterize the kinship network of an average member of the population (call her 'Focal')?
@@ -207,7 +207,7 @@ For this exercise, we'll use the pre-loaded Swedish data.
 swe_surv_2015 <- DemoKin::swe_px[,"2015"]
 swe_asfr_2015 <- DemoKin::swe_asfr[,"2015"]
 # Run kinship models
-swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
+swe_2015 <- kin(p = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
 ##### 4.1. 'Keyfitz' kinship diagram
@@ -1034,7 +1034,7 @@ kinloss_data %>%
 
 ### Lab session 3 - Assignment (Thursday)
 
-The assignment should be completed in groups that will be defined at the start of the course. **Make sure to read the instructions for the assignment in the syllabus:** https://github.com/alburezg/EDSD_2023_kinship_demography/EDSD_2023_kinship.pdf!
+The assignment should be completed in groups that will be defined at the start of the course. **Make sure to read the instructions for the assignment in the syllabus:** https://github.com/alburezg/EDSD_2023_kinship_demography/blob/main/EDSD_2023_kinship.pdf!
 
 #### Description
 
