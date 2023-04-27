@@ -227,7 +227,7 @@ Now, let's visualize how the expected number of daughters, siblings, cousins, et
 
 ```{r, fig.height=6, fig.width=8}
 swe_2015$kin_summary %>%
-  rename_kin() %>% 
+  # rename_kin() %>% 
   ggplot() +
   geom_line(aes(age_focal, count_living))  +
   geom_vline(xintercept = 35, color=2)+
@@ -1081,9 +1081,9 @@ For this first exercise, you should use `DemoKin` to replicate this figure. Conc
 - Run four iterations of the kinship model:
 
    1. One-sex model; time-invariant rates; approximate male kin using GKP factors
-   1. One-sex model; time-variant rates; approximate male kin using the androgynous assumption (i.e., male fertility is equivalent to female fertility)
-   1. Two-sex model; time-invariant rates
-   1. Two-sex model; time-variant rates; assume demographic stability before 1968
+   1. Two-sex model; time-variant rates; approximate male kin using the androgynous assumption (i.e., male fertility is equivalent to female fertility)
+   1. Two-sex model; time-invariant rates  (assume demographic stability before 1968)
+   1. Two-sex model; time-variant rates (assume demographic stability before 1968)
    
 Some useful tips for the exercise:
 
