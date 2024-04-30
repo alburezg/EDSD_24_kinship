@@ -2,11 +2,11 @@
 
 European Doctoral School of Demography (EDSD)
 
-Barcelona, April 24-29, 2023
+Paris, May 21-23, 2024
 
 **Instructor:**
 
-Diego Alburez-Gutierrez
+Diego Alburez-Gutierrez & Amanda Martins de Almeida
 
 Kinship Inequalities Research Group
 
