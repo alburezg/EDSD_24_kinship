@@ -30,7 +30,7 @@ options(scipen=999999)
 
 #### Course description: 
 
-Kinship is a fundamental property of human populations and a key form of social structure. test test
+Kinship is a fundamental property of human populations and a key form of social structure.
 Demographers have long been interested in the interplay between demographic change and family configuration.
 This has led to the development of sophisticated methodological and conceptual approaches for the study of kinship, some of which are reviewed in this course. 
 
@@ -71,7 +71,7 @@ library(ggplot2)
 library(fields)
 ```
 
-#### 2. Built-in data
+#### 2. Built-in data (not neces)
 
 The `DemoKin` package includes data from Sweden as an example. 
 The data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). 
