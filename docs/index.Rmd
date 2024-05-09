@@ -1,7 +1,7 @@
 ---
 title: "The Demography of Kinship"
 subtitle: "European Doctoral School of Demography, Paris, May 21-23, 2024"
-author: "Instructor: Diego Alburez-Gutierrez & Amanda Martins de Almeida"
+author: "Instructors: Diego Alburez-Gutierrez & Amanda Martins de Almeida"
 date: "Updated: `r Sys.Date()`"
 output:
   html_document:
@@ -30,7 +30,7 @@ options(scipen=999999)
 
 #### Course description: 
 
-Kinship is a fundamental property of human populations and a key form of social structure.
+Kinship is a fundamental property of human populations and a key form of social structure. test test
 Demographers have long been interested in the interplay between demographic change and family configuration.
 This has led to the development of sophisticated methodological and conceptual approaches for the study of kinship, some of which are reviewed in this course. 
 
