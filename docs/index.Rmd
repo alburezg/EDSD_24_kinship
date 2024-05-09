@@ -1,7 +1,7 @@
 ---
 title: "The Demography of Kinship"
-subtitle: "European Doctoral School of Demography, Barcelona, April 24-29, 2023"
-author: "Instructor: Diego Alburez-Gutierrez"
+subtitle: "European Doctoral School of Demography, Paris, May 21-23, 2024"
+author: "Instructor: Diego Alburez-Gutierrez & Amanda Martins de Almeida"
 date: "Updated: `r Sys.Date()`"
 output:
   html_document:
