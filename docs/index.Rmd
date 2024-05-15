@@ -113,60 +113,7 @@ swe_asfr %>% as.data.frame() %>%
       ggplot() +
       geom_line(aes(x = age, y = fx))
 ```
-
-
-#### 3. What if we want to work with other countries?
-
-(Unfortunelity is not working, but for your information)
-
-Thanks to the [DataPortal API](https://population.un.org/dataportal/about/dataapi#tutorial-using-r) from the UN we can download estimated rates from any country in the world, produced by the [World Population Prospects](https://population.un.org/wpp/) project. Pick any country (feel free to pick at random or choose that one that you are interested in) and download the data with the function `get_UNWPP_inputs` (located [here](https://github.com/IvanWilli/matrix_kinship_course_lab/tree/main/docs)). 
-
-Let's see the case of Brazil as an example:
-
-```{r, eval=FALSE}
-#load function
-source("get_UNWPP_inputs.R")
-
-#pick country
-country <- c("Brazil")
-
-#Year range
-my_startyr   <- 1950
-my_endyr     <- 2022
-
-#data download
-data <- get_UNWPP_inputs(
-  countries = country,
-  my_startyr = my_startyr,
-  my_endyr = my_endyr)
-```
-
-We have to reshape fertility and mortality to create a matrix to be used by `DemoKin`(i.e., create a matrix with years  as columns and ages as rows):
-
-###### 3.1. Reshape fertility
-
-```{r, eval=FALSE}
-country_fert <- data %>%
-  select(age, year, fx) %>%
-  pivot_wider(names_from = year, values_from = fx) %>%
-  select(-age) %>%
-  as.matrix()
-
-country_fert[20:25,1:5]
-```
-
-###### 3.1. Reshape survival
-
-```{r, eval=FALSE}
-country_surv <- data %>%
-  select(age, year, px) %>%
-  pivot_wider(names_from = year, values_from = px) %>%
-  select(-age) %>%
-  as.matrix()
-```
-
-
-#### 4. 'Keyfitz' kinship diagram
+#### 3. 'Keyfitz' kinship diagram
 
 We can visualize the implied kin counts for a Focal girl aged 5 yo in a time-invariant population using a network or 'Keyfitz' kinship diagram [@Keyfitz2005] with the `plot_diagram` function:
 
@@ -190,13 +137,101 @@ swe_2015$kin_summary %>%
 ```
 
 
-#### 4. Exercise
 
-Download data from the country of interest and build the 'Keyfitz' kinship diagram for a Focal girl aged 5 yo. Compare the result with the one we saw for Sweden.
+#### 4. What if we want to work with other countries?
+
+We can use data from UN World Population Prospects and download estimated rates from any country in the world.
+
+Lets see the case of Brazil in 2015:
+
+```{r}
+#load function
+source("UNWPP_data.R")
+
+#data download
+data <- UNWPP_data(country = "Brazil",
+                   start_year =  2015,
+                   end_year = 2015,
+                   sex = "Female")
+```
+
+We have to reshape fertility and mortality to create a matrix to be used by `DemoKin`(i.e., create a matrix with years  as columns and ages as rows):
+
+###### 4.1. Reshape fertility
+
+```{r, eval=FALSE}
+country_fert <- data %>%
+  select(age, year, fx) %>%
+  pivot_wider(names_from = year, values_from = fx) %>%
+  select(-age) %>%
+  as.matrix()
+```
+
+###### 4.1. Reshape survival
+
+```{r, eval=FALSE}
+country_surv <- data %>%
+  select(age, year, px) %>%
+  pivot_wider(names_from = year, values_from = px) %>%
+  select(-age) %>%
+  as.matrix()
+```
+
+#### 5. 'Keyfitz' kinship diagram
+
+We can visualize the implied kin counts for a Focal girl aged 5 yo in a time-invariant population using a network or 'Keyfitz' kinship diagram [@Keyfitz2005] with the `plot_diagram` function:
+
+
+# Run kinship models
+```{r}
+br_2015 <- 
+  kin(p = country_surv, f = country_fert, time_invariant = TRUE)
+```
+
+```{r, fig.height=10, fig.width=12}
+br_2015$kin_summary %>% 
+  filter(age_focal == 5) %>% 
+  select(kin, count = count_living) %>% 
+  plot_diagram(rounding = 2)
+```
+
+#### 6. Exercise
+
+##### 6.1 Download data in 2015 from the country of interest and build the 'Keyfitz' kinship diagram for a Focal girl aged 5 yo in a time-invariant population. Discuss the result with what we saw for Sweden and Brazil.
 
 ```{r}
 # Write your code here
 ```
+
+##### 6.2 We saw the 'Keyfitz' kinship diagram for a Focal girl aged 5 yo, but what about an older Focal, for example, a woman 60 yo, what would you expected? Build the kinship diagram for this Focal for Sweden, Brazil and the country of your choice and discuss.
+
+```{r}
+# Write your code here
+```
+
+#### 7. Access UN WPP data via API
+
+(Unfortunately it is not working, but for your information)
+
+Thanks to the [DataPortal API](https://population.un.org/dataportal/about/dataapi#tutorial-using-r) from the UN we can download estimated rates from any country in the world, produced by the [World Population Prospects](https://population.un.org/wpp/) project. Pick any country (feel free to pick at random or choose that one that you are interested in) and download the data with the function `get_UNWPP_inputs` (located [here](https://github.com/IvanWilli/matrix_kinship_course_lab/tree/main/docs)). 
+
+Let's see the case of Brazil as an example:
+
+load function
+source("get_UNWPP_inputs.R")
+
+pick country
+country <- c("Brazil")
+
+Year range
+my_startyr   <- 1950
+my_endyr     <- 2022
+
+data download
+data <- get_UNWPP_inputs(
+  countries = country,
+  my_startyr = my_startyr,
+  my_endyr = my_endyr)
 
 
 <!-- --------------------------------------------------------------------- -->
